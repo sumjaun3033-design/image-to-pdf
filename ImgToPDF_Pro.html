@@ -1,0 +1,1448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ImgToPDF Pro — AI-Powered PDF Creator</title>
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Cabinet+Grotesk:wght@300;400;500;700;800&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#07090f;
+  --bg2:#0d1018;
+  --card:#111520;
+  --card2:#161c2a;
+  --accent:#6c63ff;
+  --accent2:#ff6584;
+  --cyan:#00f0ff;
+  --gold:#ffd700;
+  --border:rgba(255,255,255,0.07);
+  --border2:rgba(255,255,255,0.12);
+  --text:#e8eaf6;
+  --muted:#6b7280;
+  --muted2:#9ca3af;
+  --success:#10b981;
+  --danger:#ef4444;
+  --radius:14px;
+  --radius-lg:20px;
+}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Cabinet Grotesk',sans-serif;
+  background:var(--bg);color:var(--text);
+  min-height:100vh;overflow-x:hidden;
+}
+
+/* ══ BACKGROUND ══ */
+.bg-mesh{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 80% 60% at 10% 10%,rgba(108,99,255,0.08) 0%,transparent 60%),
+    radial-gradient(ellipse 60% 70% at 90% 90%,rgba(0,240,255,0.06) 0%,transparent 60%),
+    radial-gradient(ellipse 50% 50% at 50% 50%,rgba(255,101,132,0.04) 0%,transparent 70%);
+}
+.grid-lines{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.015) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,0.015) 1px,transparent 1px);
+  background-size:60px 60px;
+}
+
+/* ══ NAV ══ */
+nav{
+  position:sticky;top:0;z-index:300;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1rem 2.5rem;
+  background:rgba(7,9,15,0.88);
+  backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);
+}
+.logo{
+  font-family:'Orbitron',monospace;
+  font-size:1.1rem;font-weight:900;letter-spacing:2px;
+  background:linear-gradient(120deg,var(--accent),var(--cyan));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.logo sup{
+  font-size:0.5rem;letter-spacing:1px;
+  -webkit-text-fill-color:var(--accent2);color:var(--accent2);
+}
+.nav-tabs{display:flex;gap:0.3rem}
+.nav-tab{
+  background:none;border:none;
+  color:var(--muted2);
+  font-family:'Cabinet Grotesk',sans-serif;
+  font-size:0.85rem;font-weight:500;
+  padding:0.45rem 1rem;border-radius:8px;
+  cursor:pointer;transition:all 0.2s;
+}
+.nav-tab:hover{color:var(--text);background:rgba(255,255,255,0.06)}
+.nav-tab.active{
+  color:var(--accent);
+  background:rgba(108,99,255,0.12);
+  border:1px solid rgba(108,99,255,0.25);
+}
+.ai-badge{
+  display:flex;align-items:center;gap:0.5rem;
+  background:linear-gradient(135deg,rgba(108,99,255,0.2),rgba(0,240,255,0.1));
+  border:1px solid rgba(108,99,255,0.35);
+  border-radius:100px;
+  padding:0.4rem 1rem;
+  font-size:0.78rem;font-weight:600;
+  color:var(--accent);
+  letter-spacing:0.5px;
+}
+.ai-dot{
+  width:7px;height:7px;border-radius:50%;
+  background:var(--cyan);
+  box-shadow:0 0 8px var(--cyan);
+  animation:pulse-dot 1.5s ease-in-out infinite;
+}
+@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.8)}}
+
+/* ══ WRAPPER ══ */
+.wrap{max-width:960px;margin:0 auto;padding:0 1.5rem;position:relative;z-index:1}
+
+/* ══ HERO ══ */
+.hero{
+  text-align:center;padding:4.5rem 1rem 3rem;
+  animation:rise 0.7s ease both;
+}
+@keyframes rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:0.6rem;
+  background:rgba(108,99,255,0.1);
+  border:1px solid rgba(108,99,255,0.25);
+  border-radius:100px;
+  padding:0.4rem 1.2rem;
+  font-size:0.72rem;font-weight:700;
+  color:var(--accent);letter-spacing:2px;text-transform:uppercase;
+  margin-bottom:1.8rem;
+}
+.hero h1{
+  font-family:'Clash Display',sans-serif;
+  font-size:clamp(2.5rem,6vw,4.2rem);
+  font-weight:700;line-height:1.05;
+  color:#fff;margin-bottom:1.2rem;
+  letter-spacing:-1px;
+}
+.hero h1 .g1{
+  background:linear-gradient(120deg,var(--accent),#a78bfa);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hero h1 .g2{
+  background:linear-gradient(120deg,var(--cyan),#38bdf8);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hero p{
+  color:var(--muted2);font-size:1.05rem;font-weight:400;
+  max-width:540px;margin:0 auto 2.5rem;line-height:1.7;
+}
+
+/* ══ MAIN TABS ══ */
+.main-tabs{
+  display:flex;gap:0.5rem;
+  background:var(--card);
+  border:1px solid var(--border2);
+  border-radius:var(--radius);
+  padding:0.4rem;
+  margin-bottom:1.5rem;
+}
+.main-tab{
+  flex:1;
+  background:none;border:none;
+  font-family:'Cabinet Grotesk',sans-serif;
+  font-size:0.9rem;font-weight:600;
+  color:var(--muted2);
+  padding:0.7rem 1rem;border-radius:10px;
+  cursor:pointer;transition:all 0.25s;
+  display:flex;align-items:center;justify-content:center;gap:0.5rem;
+}
+.main-tab:hover{color:var(--text)}
+.main-tab.active{
+  background:linear-gradient(135deg,rgba(108,99,255,0.25),rgba(108,99,255,0.1));
+  border:1px solid rgba(108,99,255,0.3);
+  color:#fff;
+}
+.main-tab .tab-icon{font-size:1rem}
+
+/* ══ PANELS ══ */
+.panel{display:none}
+.panel.active{display:block;animation:rise 0.3s ease both}
+
+/* ══ CARD ══ */
+.card{
+  background:var(--card);
+  border:1px solid var(--border2);
+  border-radius:var(--radius-lg);
+  padding:1.8rem;
+  margin-bottom:1rem;
+}
+
+/* ══ DROP ZONE ══ */
+.drop-zone{
+  border:2px dashed rgba(108,99,255,0.3);
+  border-radius:var(--radius);
+  padding:3rem 2rem;
+  text-align:center;cursor:pointer;
+  transition:all 0.3s;
+}
+.drop-zone:hover,.drop-zone.drag-over{
+  border-color:var(--accent);
+  background:rgba(108,99,255,0.04);
+}
+.dz-icon{
+  width:70px;height:70px;border-radius:50%;
+  background:linear-gradient(135deg,rgba(108,99,255,0.15),rgba(0,240,255,0.08));
+  border:1.5px solid rgba(108,99,255,0.3);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.8rem;margin:0 auto 1.2rem;
+  transition:all 0.3s;
+}
+.drop-zone:hover .dz-icon{
+  transform:scale(1.1);
+  box-shadow:0 0 30px rgba(108,99,255,0.2);
+}
+.drop-zone h3{font-size:1.05rem;font-weight:700;color:#fff;margin-bottom:0.4rem}
+.drop-zone p{color:var(--muted2);font-size:0.85rem;margin-bottom:1.2rem}
+.fmt-row{display:flex;gap:0.5rem;justify-content:center;flex-wrap:wrap}
+.fmt{
+  background:rgba(108,99,255,0.1);
+  border:1px solid rgba(108,99,255,0.2);
+  color:#a78bfa;
+  font-size:0.65rem;font-weight:700;letter-spacing:1.5px;
+  padding:0.25rem 0.65rem;border-radius:4px;
+}
+#fileInput{display:none}
+
+/* ══ THUMBNAILS ══ */
+.thumb-sec{display:none;margin-top:1.5rem}
+.thumb-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:0.8rem;
+}
+.thumb-hdr span{font-size:0.8rem;color:var(--muted2);font-weight:500}
+.btn-sm{
+  background:none;
+  border:1px solid rgba(239,68,68,0.3);
+  color:var(--danger);
+  font-family:'Cabinet Grotesk',sans-serif;
+  font-size:0.75rem;font-weight:600;
+  padding:0.3rem 0.8rem;border-radius:6px;cursor:pointer;
+  transition:all 0.2s;
+}
+.btn-sm:hover{background:rgba(239,68,68,0.1)}
+.thumb-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(88px,1fr));
+  gap:0.6rem;
+}
+.thumb-item{
+  position:relative;border-radius:10px;overflow:hidden;
+  border:1px solid var(--border2);aspect-ratio:1;
+  background:#0a0e18;transition:transform 0.2s;
+}
+.thumb-item:hover{transform:scale(1.04)}
+.thumb-item img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb-del{
+  position:absolute;top:4px;right:4px;
+  background:rgba(0,0,0,0.7);color:#fff;
+  border:none;width:22px;height:22px;border-radius:50%;
+  font-size:0.65rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:background 0.2s;
+}
+.thumb-del:hover{background:var(--danger)}
+.thumb-num{
+  position:absolute;bottom:0;left:0;right:0;
+  background:linear-gradient(transparent,rgba(0,0,0,0.75));
+  color:rgba(255,255,255,0.85);
+  font-size:0.58rem;font-weight:700;
+  text-align:center;padding:8px 0 3px;
+}
+
+/* ══ OPTIONS ══ */
+.opts-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:1rem;margin-top:1.5rem;
+}
+.opt label{
+  display:block;font-size:0.7rem;color:var(--muted);
+  text-transform:uppercase;letter-spacing:1.5px;
+  margin-bottom:0.45rem;font-weight:700;
+}
+.opt select,.opt input[type=text]{
+  width:100%;
+  background:rgba(255,255,255,0.03);
+  border:1px solid var(--border2);
+  color:var(--text);padding:0.6rem 0.8rem;
+  border-radius:8px;
+  font-family:'Cabinet Grotesk',sans-serif;
+  font-size:0.88rem;outline:none;cursor:pointer;
+  transition:border-color 0.2s;
+  appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b7280'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 0.8rem center;padding-right:2rem;
+}
+.opt input[type=text]{background-image:none;padding-right:0.8rem}
+.opt select option{background:#111520}
+.opt select:focus,.opt input:focus{border-color:rgba(108,99,255,0.4)}
+
+/* ══ AI TEXT PANEL ══ */
+.ai-textarea{
+  width:100%;
+  background:rgba(255,255,255,0.03);
+  border:1px solid var(--border2);
+  color:var(--text);
+  font-family:'Cabinet Grotesk',sans-serif;
+  font-size:0.95rem;line-height:1.7;
+  padding:1rem;border-radius:10px;
+  resize:vertical;min-height:180px;outline:none;
+  transition:border-color 0.2s;
+}
+.ai-textarea:focus{border-color:rgba(108,99,255,0.4)}
+.ai-textarea::placeholder{color:var(--muted)}
+
+/* AI Prompt Row */
+.ai-prompt-row{
+  display:flex;gap:0.7rem;margin-top:1rem;
+}
+.ai-prompt-input{
+  flex:1;
+  background:rgba(255,255,255,0.03);
+  border:1px solid var(--border2);
+  color:var(--text);
+  font-family:'Cabinet Grotesk',sans-serif;
+  font-size:0.88rem;
+  padding:0.65rem 1rem;border-radius:10px;outline:none;
+  transition:border-color 0.2s;
+}
+.ai-prompt-input:focus{border-color:rgba(108,99,255,0.4)}
+.ai-prompt-input::placeholder{color:var(--muted)}
+.btn-ai{
+  background:linear-gradient(135deg,var(--accent),#7c3aed);
+  border:none;color:#fff;
+  font-family:'Cabinet Grotesk',sans-serif;
+  font-size:0.85rem;font-weight:700;
+  padding:0.65rem 1.4rem;border-radius:10px;cursor:pointer;
+  display:flex;align-items:center;gap:0.5rem;
+  transition:all 0.25s;white-space:nowrap;
+}
+.btn-ai:hover{
+  transform:translateY(-1px);
+  box-shadow:0 8px 24px rgba(108,99,255,0.35);
+}
+.btn-ai:disabled{opacity:0.5;cursor:not-allowed;transform:none;box-shadow:none}
+
+/* Text Style Options */
+.text-style-row{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+  gap:0.8rem;margin-top:1rem;
+}
+.style-opt label{
+  display:block;font-size:0.68rem;color:var(--muted);
+  text-transform:uppercase;letter-spacing:1.5px;
+  margin-bottom:0.4rem;font-weight:700;
+}
+.style-opt select{
+  width:100%;
+  background:rgba(255,255,255,0.03);
+  border:1px solid var(--border2);
+  color:var(--text);padding:0.5rem 0.7rem;
+  border-radius:8px;
+  font-family:'Cabinet Grotesk',sans-serif;
+  font-size:0.82rem;outline:none;
+  transition:border-color 0.2s;
+  appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b7280'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 0.7rem center;padding-right:1.8rem;
+}
+.style-opt select option{background:#111520}
+.style-opt select:focus{border-color:rgba(108,99,255,0.4)}
+
+/* ══ AI COLOR PANEL ══ */
+.color-themes{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(130px,1fr));
+  gap:0.8rem;
+  margin-bottom:1.2rem;
+}
+.theme-card{
+  border-radius:12px;
+  overflow:hidden;
+  border:2px solid transparent;
+  cursor:pointer;
+  transition:all 0.25s;
+  position:relative;
+}
+.theme-card:hover{transform:scale(1.03)}
+.theme-card.selected{border-color:var(--accent);}
+.theme-preview{height:70px;display:flex;flex-direction:column;gap:4px;padding:8px}
+.theme-bar{height:10px;border-radius:3px;background:rgba(255,255,255,0.3)}
+.theme-bar:nth-child(2){width:70%}
+.theme-bar:nth-child(3){width:50%}
+.theme-label{
+  text-align:center;padding:0.5rem;
+  font-size:0.75rem;font-weight:700;
+  letter-spacing:0.5px;
+}
+.theme-tick{
+  position:absolute;top:6px;right:6px;
+  width:20px;height:20px;border-radius:50%;
+  background:var(--accent);
+  display:none;align-items:center;justify-content:center;
+  font-size:0.65rem;color:#fff;
+}
+.theme-card.selected .theme-tick{display:flex}
+
+.ai-color-prompt-row{
+  display:flex;gap:0.7rem;
+}
+.ai-color-input{
+  flex:1;
+  background:rgba(255,255,255,0.03);
+  border:1px solid var(--border2);
+  color:var(--text);
+  font-family:'Cabinet Grotesk',sans-serif;
+  font-size:0.88rem;
+  padding:0.65rem 1rem;border-radius:10px;outline:none;
+  transition:border-color 0.2s;
+}
+.ai-color-input:focus{border-color:rgba(108,99,255,0.4)}
+.ai-color-input::placeholder{color:var(--muted)}
+
+/* AI Response Box */
+.ai-response{
+  display:none;
+  margin-top:1rem;
+  background:rgba(108,99,255,0.06);
+  border:1px solid rgba(108,99,255,0.2);
+  border-radius:10px;
+  padding:1rem 1.2rem;
+}
+.ai-response-header{
+  display:flex;align-items:center;gap:0.5rem;
+  font-size:0.75rem;font-weight:700;
+  color:var(--accent);letter-spacing:1px;
+  text-transform:uppercase;margin-bottom:0.6rem;
+}
+.ai-response-text{
+  font-size:0.88rem;color:var(--muted2);
+  line-height:1.6;white-space:pre-line;
+}
+
+/* Typing animation */
+.typing::after{
+  content:'▋';animation:blink-cursor 0.7s infinite;
+  color:var(--accent);
+}
+@keyframes blink-cursor{0%,100%{opacity:1}50%{opacity:0}}
+
+/* ══ CONVERT BUTTON ══ */
+.btn-convert{
+  width:100%;margin-top:1.5rem;
+  padding:1.1rem;
+  background:linear-gradient(135deg,rgba(108,99,255,0.2),rgba(108,99,255,0.08));
+  border:1px solid rgba(108,99,255,0.4);
+  color:#a78bfa;
+  font-family:'Orbitron',monospace;
+  font-size:0.9rem;font-weight:700;letter-spacing:2.5px;
+  border-radius:var(--radius);cursor:pointer;
+  transition:all 0.3s;position:relative;overflow:hidden;
+}
+.btn-convert::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent 0%,rgba(108,99,255,0.12) 50%,transparent 100%);
+  transform:translateX(-100%);
+  transition:transform 0.7s;
+}
+.btn-convert:hover::after{transform:translateX(100%)}
+.btn-convert:hover{
+  background:linear-gradient(135deg,rgba(108,99,255,0.3),rgba(108,99,255,0.15));
+  box-shadow:0 0 40px rgba(108,99,255,0.2);
+  color:#fff;
+}
+.btn-convert:disabled{opacity:0.3;cursor:not-allowed}
+.btn-convert:disabled::after{display:none}
+
+/* ══ PROGRESS ══ */
+.prog-wrap{display:none;margin-top:1rem}
+.prog-bg{background:rgba(255,255,255,0.06);border-radius:100px;height:4px;overflow:hidden}
+.prog-fill{
+  height:100%;width:0%;border-radius:100px;
+  background:linear-gradient(90deg,var(--accent),var(--cyan));
+  transition:width 0.4s ease;
+}
+.prog-txt{text-align:center;font-size:0.77rem;color:var(--muted2);margin-top:0.6rem}
+
+/* ══ DOWNLOAD ══ */
+.dl-box{
+  display:none;margin-top:1.2rem;
+  background:rgba(16,185,129,0.06);
+  border:1px solid rgba(16,185,129,0.2);
+  border-radius:var(--radius);padding:1.5rem;
+  text-align:center;animation:rise 0.4s ease both;
+}
+.dl-emoji{font-size:2.2rem;margin-bottom:0.5rem}
+.dl-title{color:var(--success);font-weight:700;font-size:1rem;margin-bottom:0.3rem}
+.dl-sub{color:var(--muted2);font-size:0.8rem;margin-bottom:1.2rem}
+.btn-dl{
+  display:inline-flex;align-items:center;gap:0.6rem;
+  background:var(--success);color:#000;
+  font-family:'Orbitron',monospace;
+  font-size:0.8rem;font-weight:700;letter-spacing:1.5px;
+  padding:0.8rem 2rem;border-radius:10px;
+  text-decoration:none;border:none;cursor:pointer;
+  transition:all 0.2s;
+}
+.btn-dl:hover{background:#34d399;transform:translateY(-2px);box-shadow:0 8px 28px rgba(16,185,129,0.3)}
+.btn-reset{
+  display:inline-block;margin-top:0.8rem;
+  color:var(--muted2);font-size:0.78rem;cursor:pointer;
+  text-decoration:underline;transition:color 0.2s;
+}
+.btn-reset:hover{color:var(--accent)}
+
+/* ══ FEATURES ══ */
+.sec-label{
+  text-align:center;font-size:0.68rem;color:var(--muted);
+  text-transform:uppercase;letter-spacing:3px;
+  margin-bottom:0.5rem;font-weight:700;
+}
+.sec-title{
+  text-align:center;
+  font-family:'Clash Display',sans-serif;
+  font-size:clamp(1.3rem,3vw,2rem);
+  font-weight:600;color:#fff;margin-bottom:2.5rem;
+}
+.feats{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:1rem;margin-bottom:5rem;
+}
+.feat{
+  background:var(--card2);
+  border:1px solid var(--border);
+  border-radius:var(--radius);padding:1.6rem;
+  transition:all 0.3s;
+}
+.feat:hover{border-color:rgba(108,99,255,0.3);transform:translateY(-3px)}
+.feat-ico{
+  width:46px;height:46px;border-radius:12px;
+  background:linear-gradient(135deg,rgba(108,99,255,0.15),rgba(0,240,255,0.08));
+  border:1px solid rgba(108,99,255,0.2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.3rem;margin-bottom:1rem;
+}
+.feat h4{font-size:0.95rem;font-weight:700;color:#fff;margin-bottom:0.4rem}
+.feat p{font-size:0.82rem;color:var(--muted2);line-height:1.6}
+
+/* ══ STEPS ══ */
+.steps{display:flex;gap:0;position:relative;margin-bottom:5rem}
+.steps::before{
+  content:'';position:absolute;
+  top:1.7rem;left:20%;right:20%;height:1px;
+  background:linear-gradient(90deg,rgba(108,99,255,0.4),rgba(0,240,255,0.2),rgba(108,99,255,0.4));
+}
+.step{flex:1;text-align:center;padding:1rem}
+.step-num{
+  width:44px;height:44px;border-radius:50%;
+  background:var(--card2);
+  border:1px solid rgba(108,99,255,0.35);
+  color:var(--accent);
+  font-family:'Orbitron',monospace;
+  font-weight:700;font-size:0.82rem;
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 0.85rem;position:relative;z-index:1;
+  transition:all 0.3s;
+}
+.step:hover .step-num{
+  background:rgba(108,99,255,0.15);
+  box-shadow:0 0 20px rgba(108,99,255,0.25);
+}
+.step h5{font-size:0.88rem;font-weight:700;color:#fff;margin-bottom:0.3rem}
+.step p{font-size:0.77rem;color:var(--muted2);line-height:1.5}
+
+/* ══ FOOTER ══ */
+footer{
+  border-top:1px solid var(--border);
+  padding:2rem 1.5rem;text-align:center;
+  color:var(--muted);font-size:0.8rem;line-height:1.8;
+}
+footer strong{color:var(--muted2)}
+
+/* ══ TOAST ══ */
+.toast{
+  position:fixed;bottom:2rem;right:2rem;
+  background:var(--card2);border:1px solid var(--border2);
+  border-radius:10px;padding:0.85rem 1.3rem;
+  font-size:0.83rem;z-index:999;
+  transform:translateY(100px);opacity:0;
+  transition:all 0.3s ease;
+}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.error{border-color:rgba(239,68,68,0.35);color:var(--danger)}
+.toast.success{border-color:rgba(16,185,129,0.3);color:var(--success)}
+.toast.info{border-color:rgba(108,99,255,0.35);color:#a78bfa}
+
+/* ══ LOADING SPINNER ══ */
+.spin{
+  display:inline-block;
+  width:14px;height:14px;
+  border:2px solid rgba(255,255,255,0.2);
+  border-top-color:#fff;
+  border-radius:50%;
+  animation:spin 0.7s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ══ SECTION DIVIDER ══ */
+.divider{
+  height:1px;
+  background:linear-gradient(90deg,transparent,var(--border2),transparent);
+  margin:3rem 0;
+}
+
+/* Color picker row */
+.color-pick-row{
+  display:flex;gap:0.8rem;align-items:center;
+  margin-top:1rem;flex-wrap:wrap;
+}
+.color-pick-row label{
+  font-size:0.72rem;color:var(--muted);
+  text-transform:uppercase;letter-spacing:1.5px;font-weight:700;
+}
+.color-swatch{
+  width:32px;height:32px;border-radius:8px;
+  border:2px solid transparent;
+  cursor:pointer;transition:all 0.2s;
+}
+.color-swatch:hover{transform:scale(1.15)}
+.color-swatch.active{border-color:#fff;box-shadow:0 0 12px rgba(255,255,255,0.3)}
+</style>
+</head>
+<body>
+
+<div class="bg-mesh"></div>
+<div class="grid-lines"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">ImgToPDF<sup>PRO</sup></div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="scrollTo(0,0)">Home</button>
+    <button class="nav-tab" onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'})">Features</button>
+    <button class="nav-tab" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">How It Works</button>
+  </div>
+  <div class="ai-badge"><div class="ai-dot"></div>AI Powered</div>
+</nav>
+
+<!-- HERO -->
+<div class="wrap">
+  <div class="hero">
+    <div class="hero-eyebrow">✨ Next-Gen PDF Creator</div>
+    <h1>
+      <span class="g1">AI-Powered</span> PDF<br>
+      <span class="g2">Creator & Converter</span>
+    </h1>
+    <p>Convert images, style text with AI, change themes with voice commands — everything you need to create stunning PDFs instantly.</p>
+  </div>
+
+  <!-- MAIN TABS -->
+  <div class="main-tabs">
+    <button class="main-tab active" onclick="switchPanel('images')">
+      <span class="tab-icon">🖼️</span> Image → PDF
+    </button>
+    <button class="main-tab" onclick="switchPanel('text')">
+      <span class="tab-icon">✍️</span> AI Text → PDF
+    </button>
+    <button class="main-tab" onclick="switchPanel('theme')">
+      <span class="tab-icon">🎨</span> AI Theme
+    </button>
+  </div>
+
+  <!-- ══ PANEL 1: IMAGE TO PDF ══ -->
+  <div class="panel active" id="panel-images">
+    <div class="card">
+      <div class="drop-zone" id="dropZone">
+        <div class="dz-icon">📂</div>
+        <h3>Drag & Drop Your Images Here</h3>
+        <p>Click to browse — supports multiple files</p>
+        <div class="fmt-row">
+          <span class="fmt">JPG</span><span class="fmt">PNG</span>
+          <span class="fmt">WEBP</span><span class="fmt">GIF</span><span class="fmt">BMP</span>
+        </div>
+        <input type="file" id="fileInput" multiple accept="image/*">
+      </div>
+
+      <div class="thumb-sec" id="thumbSec">
+        <div class="thumb-hdr">
+          <span id="imgCount">0 images</span>
+          <button class="btn-sm" onclick="clearAll()">✕ Clear All</button>
+        </div>
+        <div class="thumb-grid" id="thumbGrid"></div>
+      </div>
+
+      <div class="opts-grid">
+        <div class="opt">
+          <label>Page Size</label>
+          <select id="pageSize">
+            <option value="a4">A4 (210×297mm)</option>
+            <option value="letter">Letter (8.5×11in)</option>
+            <option value="a3">A3 (297×420mm)</option>
+            <option value="a5">A5 (148×210mm)</option>
+          </select>
+        </div>
+        <div class="opt">
+          <label>Orientation</label>
+          <select id="orientation">
+            <option value="portrait">Portrait</option>
+            <option value="landscape">Landscape</option>
+          </select>
+        </div>
+        <div class="opt">
+          <label>Image Fit</label>
+          <select id="imgFit">
+            <option value="fit">Fit to Page</option>
+            <option value="fill">Fill Page</option>
+            <option value="center">Center (Original)</option>
+          </select>
+        </div>
+        <div class="opt">
+          <label>Quality</label>
+          <select id="quality">
+            <option value="0.95">High Quality</option>
+            <option value="0.8">Medium</option>
+            <option value="0.6">Low (Smaller file)</option>
+          </select>
+        </div>
+        <div class="opt" style="grid-column:1/-1">
+          <label>PDF Filename</label>
+          <input type="text" id="fileName" value="ImgToPDF_output" placeholder="Enter filename...">
+        </div>
+      </div>
+
+      <button class="btn-convert" id="convertBtn" onclick="convertImages()" disabled>
+        ⚡ CONVERT TO PDF
+      </button>
+
+      <div class="prog-wrap" id="progWrap">
+        <div class="prog-bg"><div class="prog-fill" id="progFill"></div></div>
+        <div class="prog-txt" id="progTxt">Processing...</div>
+      </div>
+
+      <div class="dl-box" id="dlBox">
+        <div class="dl-emoji">✅</div>
+        <div class="dl-title">PDF Ready!</div>
+        <div class="dl-sub" id="dlSub">Your file is ready</div>
+        <a class="btn-dl" id="dlBtn" href="#" download>⬇ Download PDF</a><br>
+        <span class="btn-reset" onclick="resetAll()">↺ Convert more images</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PANEL 2: AI TEXT TO PDF ══ -->
+  <div class="panel" id="panel-text">
+    <div class="card">
+      <div style="margin-bottom:1rem">
+        <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.5rem">
+          <div class="ai-dot"></div>
+          <span style="font-size:0.78rem;color:var(--accent);font-weight:700;text-transform:uppercase;letter-spacing:1px">AI Text Generator</span>
+        </div>
+        <p style="font-size:0.85rem;color:var(--muted2);line-height:1.6">Tell AI what to write — it will generate styled text and convert it to PDF automatically.</p>
+      </div>
+
+      <div class="ai-prompt-row">
+        <input class="ai-prompt-input" id="aiPrompt" placeholder="e.g. Write a professional resignation letter for a software engineer..." />
+        <button class="btn-ai" id="aiGenBtn" onclick="generateAIText()">
+          ✨ Generate
+        </button>
+      </div>
+
+      <div class="ai-response" id="aiResponse">
+        <div class="ai-response-header">
+          <div class="ai-dot"></div>
+          AI Response
+        </div>
+        <div class="ai-response-text" id="aiResponseText"></div>
+      </div>
+
+      <div style="margin-top:1.2rem">
+        <div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:0.5rem">
+          Your Text (edit freely)
+        </div>
+        <textarea class="ai-textarea" id="textContent" placeholder="Type or paste your text here, or use AI to generate it above...
+
+You can write anything:
+• Reports and documents
+• Letters and emails
+• Stories and essays
+• Meeting notes
+• Any content you want in PDF!"></textarea>
+      </div>
+
+      <div class="text-style-row">
+        <div class="style-opt">
+          <label>Font Style</label>
+          <select id="txtFont">
+            <option value="helvetica">Helvetica (Modern)</option>
+            <option value="times">Times Roman (Classic)</option>
+            <option value="courier">Courier (Monospace)</option>
+          </select>
+        </div>
+        <div class="style-opt">
+          <label>Font Size</label>
+          <select id="txtSize">
+            <option value="10">Small (10pt)</option>
+            <option value="12" selected>Normal (12pt)</option>
+            <option value="14">Large (14pt)</option>
+            <option value="16">Extra Large (16pt)</option>
+          </select>
+        </div>
+        <div class="style-opt">
+          <label>Text Align</label>
+          <select id="txtAlign">
+            <option value="left">Left</option>
+            <option value="center">Center</option>
+            <option value="right">Right</option>
+            <option value="justify">Justify</option>
+          </select>
+        </div>
+        <div class="style-opt">
+          <label>Line Spacing</label>
+          <select id="lineSpacing">
+            <option value="1.2">Compact</option>
+            <option value="1.5" selected>Normal</option>
+            <option value="2">Double</option>
+          </select>
+        </div>
+        <div class="style-opt">
+          <label>Page Size</label>
+          <select id="txtPageSize">
+            <option value="a4">A4</option>
+            <option value="letter">Letter</option>
+            <option value="a3">A3</option>
+          </select>
+        </div>
+        <div class="style-opt">
+          <label>PDF Filename</label>
+          <input type="text" id="txtFileName" value="AI_Document" placeholder="filename" style="background-image:none;padding-right:0.7rem">
+        </div>
+      </div>
+
+      <button class="btn-convert" onclick="convertText()" id="txtConvertBtn">
+        ⚡ CONVERT TEXT TO PDF
+      </button>
+
+      <div class="prog-wrap" id="txtProgWrap">
+        <div class="prog-bg"><div class="prog-fill" id="txtProgFill"></div></div>
+        <div class="prog-txt" id="txtProgTxt">Generating PDF...</div>
+      </div>
+
+      <div class="dl-box" id="txtDlBox">
+        <div class="dl-emoji">✅</div>
+        <div class="dl-title">PDF Ready!</div>
+        <div class="dl-sub" id="txtDlSub">Your document is ready</div>
+        <a class="btn-dl" id="txtDlBtn" href="#" download>⬇ Download PDF</a><br>
+        <span class="btn-reset" onclick="document.getElementById('txtDlBox').style.display='none'">↺ Create another</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PANEL 3: AI THEME ══ -->
+  <div class="panel" id="panel-theme">
+    <div class="card">
+      <div style="margin-bottom:1.2rem">
+        <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.5rem">
+          <div class="ai-dot"></div>
+          <span style="font-size:0.78rem;color:var(--accent);font-weight:700;text-transform:uppercase;letter-spacing:1px">AI Theme Engine</span>
+        </div>
+        <p style="font-size:0.85rem;color:var(--muted2);line-height:1.6">Describe a vibe and AI will change the website's colors and theme instantly!</p>
+      </div>
+
+      <div class="ai-color-prompt-row">
+        <input class="ai-color-input" id="colorPrompt" placeholder='Try: "ocean sunset", "neon cyberpunk", "forest green", "royal gold"...' />
+        <button class="btn-ai" id="colorAiBtn" onclick="applyAITheme()">
+          🎨 Apply Theme
+        </button>
+      </div>
+
+      <div class="ai-response" id="themeResponse">
+        <div class="ai-response-header"><div class="ai-dot"></div>AI Theme Suggestion</div>
+        <div class="ai-response-text" id="themeResponseText"></div>
+      </div>
+
+      <div class="divider" style="margin:1.5rem 0"></div>
+
+      <div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:1rem">
+        Quick Themes
+      </div>
+      <div class="color-themes" id="colorThemes">
+        <div class="theme-card selected" onclick="applyTheme(this,'#6c63ff','#07090f','#0d1018')" data-name="Cosmic Purple">
+          <div class="theme-preview" style="background:linear-gradient(135deg,#07090f,#1a1030)">
+            <div class="theme-bar" style="background:#6c63ff"></div>
+            <div class="theme-bar" style="background:#a78bfa"></div>
+            <div class="theme-bar" style="background:#00f0ff"></div>
+          </div>
+          <div class="theme-label" style="background:#111520;color:#a78bfa">Cosmic Purple</div>
+          <div class="theme-tick">✓</div>
+        </div>
+        <div class="theme-card" onclick="applyTheme(this,'#00d4aa','#040f0b','#081a12')" data-name="Ocean Teal">
+          <div class="theme-preview" style="background:linear-gradient(135deg,#040f0b,#0a1f16)">
+            <div class="theme-bar" style="background:#00d4aa"></div>
+            <div class="theme-bar" style="background:#00ffcc"></div>
+            <div class="theme-bar" style="background:#00a88f"></div>
+          </div>
+          <div class="theme-label" style="background:#081a12;color:#00d4aa">Ocean Teal</div>
+          <div class="theme-tick">✓</div>
+        </div>
+        <div class="theme-card" onclick="applyTheme(this,'#ff6b35','#0f0900','#1a0f00')" data-name="Sunset Fire">
+          <div class="theme-preview" style="background:linear-gradient(135deg,#0f0900,#1a1000)">
+            <div class="theme-bar" style="background:#ff6b35"></div>
+            <div class="theme-bar" style="background:#ffd700"></div>
+            <div class="theme-bar" style="background:#ff4500"></div>
+          </div>
+          <div class="theme-label" style="background:#1a0f00;color:#ff6b35">Sunset Fire</div>
+          <div class="theme-tick">✓</div>
+        </div>
+        <div class="theme-card" onclick="applyTheme(this,'#ff2d78','#0f0009','#1a0012')" data-name="Neon Pink">
+          <div class="theme-preview" style="background:linear-gradient(135deg,#0f0009,#1a0015)">
+            <div class="theme-bar" style="background:#ff2d78"></div>
+            <div class="theme-bar" style="background:#ff79c6"></div>
+            <div class="theme-bar" style="background:#bf00ff"></div>
+          </div>
+          <div class="theme-label" style="background:#1a0012;color:#ff2d78">Neon Pink</div>
+          <div class="theme-tick">✓</div>
+        </div>
+        <div class="theme-card" onclick="applyTheme(this,'#00f0ff','#050a10','#0a1520')" data-name="Ice Cyber">
+          <div class="theme-preview" style="background:linear-gradient(135deg,#050a10,#0a1520)">
+            <div class="theme-bar" style="background:#00f0ff"></div>
+            <div class="theme-bar" style="background:#38bdf8"></div>
+            <div class="theme-bar" style="background:#0080ff"></div>
+          </div>
+          <div class="theme-label" style="background:#0a1520;color:#00f0ff">Ice Cyber</div>
+          <div class="theme-tick">✓</div>
+        </div>
+        <div class="theme-card" onclick="applyTheme(this,'#ffd700','#0a0800','#151100')" data-name="Royal Gold">
+          <div class="theme-preview" style="background:linear-gradient(135deg,#0a0800,#1a1500)">
+            <div class="theme-bar" style="background:#ffd700"></div>
+            <div class="theme-bar" style="background:#ffed4e"></div>
+            <div class="theme-bar" style="background:#ffa500"></div>
+          </div>
+          <div class="theme-label" style="background:#151100;color:#ffd700">Royal Gold</div>
+          <div class="theme-tick">✓</div>
+        </div>
+        <div class="theme-card" onclick="applyTheme(this,'#50fa7b','#050f05','#0a1a0a')" data-name="Matrix Green">
+          <div class="theme-preview" style="background:linear-gradient(135deg,#050f05,#0a1a0a)">
+            <div class="theme-bar" style="background:#50fa7b"></div>
+            <div class="theme-bar" style="background:#69ff8d"></div>
+            <div class="theme-bar" style="background:#00d455"></div>
+          </div>
+          <div class="theme-label" style="background:#0a1a0a;color:#50fa7b">Matrix Green</div>
+          <div class="theme-tick">✓</div>
+        </div>
+        <div class="theme-card" onclick="applyTheme(this,'#c084fc','#0d080f','#180a20')" data-name="Lavender Haze">
+          <div class="theme-preview" style="background:linear-gradient(135deg,#0d080f,#180a20)">
+            <div class="theme-bar" style="background:#c084fc"></div>
+            <div class="theme-bar" style="background:#e879f9"></div>
+            <div class="theme-bar" style="background:#9333ea"></div>
+          </div>
+          <div class="theme-label" style="background:#180a20;color:#c084fc">Lavender Haze</div>
+          <div class="theme-tick">✓</div>
+        </div>
+      </div>
+
+      <div class="divider" style="margin:1rem 0"></div>
+      <div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:0.8rem">
+        Custom Accent Color
+      </div>
+      <div class="color-pick-row">
+        <label>Pick:</label>
+        <div class="color-swatch active" style="background:#6c63ff" onclick="setCustomColor('#6c63ff',this)"></div>
+        <div class="color-swatch" style="background:#00d4aa" onclick="setCustomColor('#00d4aa',this)"></div>
+        <div class="color-swatch" style="background:#ff6b35" onclick="setCustomColor('#ff6b35',this)"></div>
+        <div class="color-swatch" style="background:#ff2d78" onclick="setCustomColor('#ff2d78',this)"></div>
+        <div class="color-swatch" style="background:#ffd700" onclick="setCustomColor('#ffd700',this)"></div>
+        <div class="color-swatch" style="background:#50fa7b" onclick="setCustomColor('#50fa7b',this)"></div>
+        <div class="color-swatch" style="background:#00f0ff" onclick="setCustomColor('#00f0ff',this)"></div>
+        <input type="color" id="customColor" value="#6c63ff"
+          style="width:32px;height:32px;border-radius:8px;border:2px solid var(--border2);cursor:pointer;background:none;padding:1px"
+          oninput="setCustomColor(this.value,null)">
+      </div>
+    </div>
+  </div>
+
+  <!-- DIVIDER -->
+  <div class="divider"></div>
+
+  <!-- FEATURES -->
+  <div id="features">
+    <div class="sec-label">Why ImgToPDF Pro?</div>
+    <div class="sec-title">Everything, Powered by AI</div>
+    <div class="feats">
+      <div class="feat">
+        <div class="feat-ico">🤖</div>
+        <h4>AI Text Generator</h4>
+        <p>Describe what you need — AI writes it and converts directly to a styled PDF.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-ico">🎨</div>
+        <h4>AI Theme Engine</h4>
+        <p>Say "ocean sunset" or "neon cyberpunk" — AI changes the entire website theme instantly.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-ico">🖼️</div>
+        <h4>Image Converter</h4>
+        <p>Drag & drop multiple images, set page options, and get a perfect PDF in seconds.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-ico">✍️</div>
+        <h4>Styled Text PDF</h4>
+        <p>Choose fonts, size, alignment, and spacing. Create beautifully formatted documents.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-ico">🔒</div>
+        <h4>100% Private</h4>
+        <p>All conversion happens in your browser. Nothing is uploaded to any server.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-ico">⚡</div>
+        <h4>Instant & Free</h4>
+        <p>No signup, no watermarks, no file limits. Use it unlimited times, completely free.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div id="how">
+    <div class="sec-label">Simple Process</div>
+    <div class="sec-title">How It Works</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <h5>Choose Mode</h5>
+        <p>Pick Image PDF, AI Text PDF, or AI Theme tab</p>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <h5>Upload or Type</h5>
+        <p>Add images, write text, or give AI a prompt</p>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <h5>Convert & Download</h5>
+        <p>Get your perfectly formatted PDF instantly</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <strong>ImgToPDF Pro</strong> — AI-Powered PDF Creator<br>
+  <small>Free · Private · No uploads · Works 100% in your browser</small>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════
+// GLOBAL STATE
+// ══════════════════════════════════════
+let images = [];
+let blobUrl = null;
+let toastTimer;
+const ANTHROPIC_API = 'https://api.anthropic.com/v1/messages';
+
+// ══════════════════════════════════════
+// PANEL SWITCHING
+// ══════════════════════════════════════
+function switchPanel(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+// ══════════════════════════════════════
+// IMAGE TO PDF
+// ══════════════════════════════════════
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+
+dropZone.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('drag-over'); handleFiles(e.dataTransfer.files); });
+fileInput.addEventListener('change', () => { handleFiles(fileInput.files); fileInput.value = ''; });
+
+function handleFiles(files) {
+  const valid = Array.from(files).filter(f => f.type.startsWith('image/'));
+  if (!valid.length) { showToast('No valid image files!', 'error'); return; }
+  let loaded = 0;
+  valid.forEach(file => {
+    const r = new FileReader();
+    r.onload = e => {
+      images.push({ src: e.target.result, name: file.name });
+      loaded++;
+      if (loaded === valid.length) renderThumbs();
+    };
+    r.readAsDataURL(file);
+  });
+}
+
+function renderThumbs() {
+  const grid = document.getElementById('thumbGrid');
+  grid.innerHTML = '';
+  images.forEach((img, i) => {
+    const d = document.createElement('div');
+    d.className = 'thumb-item';
+    d.innerHTML = `<img src="${img.src}" alt="${img.name}"><button class="thumb-del" onclick="removeImg(${i})">✕</button><div class="thumb-num">${i + 1}</div>`;
+    grid.appendChild(d);
+  });
+  document.getElementById('thumbSec').style.display = images.length ? 'block' : 'none';
+  document.getElementById('imgCount').textContent = `${images.length} image${images.length !== 1 ? 's' : ''} selected`;
+  document.getElementById('convertBtn').disabled = !images.length;
+  document.getElementById('dlBox').style.display = 'none';
+}
+
+window.removeImg = i => { images.splice(i, 1); renderThumbs(); };
+window.clearAll = () => { images = []; renderThumbs(); showToast('Cleared!', 'info'); };
+
+async function convertImages() {
+  if (!images.length) return;
+  const ps = document.getElementById('pageSize').value;
+  const or = document.getElementById('orientation').value;
+  const fit = document.getElementById('imgFit').value;
+  const fn = (document.getElementById('fileName').value.trim() || 'ImgToPDF') + '.pdf';
+
+  setBusy('convertBtn', true, '⚡ CONVERTING...');
+  setProgress('progWrap', 'progFill', 'progTxt', 0, 'Initialising...');
+  document.getElementById('dlBox').style.display = 'none';
+
+  await delay(80);
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: or, unit: 'mm', format: ps });
+    const pw = doc.internal.pageSize.getWidth();
+    const ph = doc.internal.pageSize.getHeight();
+
+    for (let i = 0; i < images.length; i++) {
+      setProgress('progWrap', 'progFill', 'progTxt', Math.round((i / images.length) * 90), `Image ${i + 1} of ${images.length}...`);
+      await delay(30);
+      if (i > 0) doc.addPage();
+      const el = await loadImg(images[i].src);
+      let x = 0, y = 0, w = pw, h = ph;
+      if (fit === 'fit') {
+        const r = Math.min(pw / el.naturalWidth, ph / el.naturalHeight);
+        w = el.naturalWidth * r; h = el.naturalHeight * r;
+        x = (pw - w) / 2; y = (ph - h) / 2;
+      } else if (fit === 'center') {
+        w = Math.min(el.naturalWidth * 0.264583, pw);
+        h = Math.min(el.naturalHeight * 0.264583, ph);
+        x = (pw - w) / 2; y = (ph - h) / 2;
+      }
+      const fmt = images[i].src.startsWith('data:image/png') ? 'PNG' : 'JPEG';
+      doc.addImage(images[i].src, fmt, x, y, w, h, undefined, 'FAST');
+    }
+
+    setProgress('progWrap', 'progFill', 'progTxt', 100, 'Done!');
+    await delay(300);
+
+    const blob = doc.output('blob');
+    if (blobUrl) URL.revokeObjectURL(blobUrl);
+    blobUrl = URL.createObjectURL(blob);
+    const dlBtn = document.getElementById('dlBtn');
+    dlBtn.href = blobUrl; dlBtn.download = fn;
+    document.getElementById('dlSub').textContent = `${images.length} pages · ${(blob.size / 1024).toFixed(0)} KB · ${fn}`;
+    document.getElementById('progWrap').style.display = 'none';
+    document.getElementById('dlBox').style.display = 'block';
+    showToast('PDF created!', 'success');
+  } catch (e) {
+    document.getElementById('progWrap').style.display = 'none';
+    showToast('Error: ' + e.message, 'error');
+  }
+  setBusy('convertBtn', false, '⚡ CONVERT TO PDF');
+}
+
+window.resetAll = () => { images = []; renderThumbs(); };
+
+// ══════════════════════════════════════
+// AI TEXT TO PDF
+// ══════════════════════════════════════
+async function generateAIText() {
+  const prompt = document.getElementById('aiPrompt').value.trim();
+  if (!prompt) { showToast('Enter a prompt first!', 'error'); return; }
+
+  const btn = document.getElementById('aiGenBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin"></div> Generating...';
+
+  const respBox = document.getElementById('aiResponse');
+  const respText = document.getElementById('aiResponseText');
+  respBox.style.display = 'block';
+  respText.textContent = '';
+  respText.classList.add('typing');
+
+  try {
+    const res = await fetch(ANTHROPIC_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{
+          role: 'user',
+          content: `You are a professional document writer. Write the following document in a clean, professional format. Use proper paragraphs, headers where needed, and make it ready to be converted to PDF.\n\nRequest: ${prompt}\n\nWrite the complete document now:`
+        }]
+      })
+    });
+
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+
+    const text = data.content?.map(c => c.text || '').join('') || '';
+    respText.classList.remove('typing');
+    respText.textContent = text;
+    document.getElementById('textContent').value = text;
+    showToast('AI text generated!', 'success');
+  } catch (e) {
+    respText.classList.remove('typing');
+    respText.textContent = 'Error: ' + e.message + '\n\nNote: Make sure the Anthropic API is connected.';
+    showToast('API Error', 'error');
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '✨ Generate';
+}
+
+async function convertText() {
+  const content = document.getElementById('textContent').value.trim();
+  if (!content) { showToast('Please enter some text first!', 'error'); return; }
+
+  const font = document.getElementById('txtFont').value;
+  const size = parseInt(document.getElementById('txtSize').value);
+  const align = document.getElementById('txtAlign').value;
+  const spacing = parseFloat(document.getElementById('lineSpacing').value);
+  const ps = document.getElementById('txtPageSize').value;
+  const fn = (document.getElementById('txtFileName').value.trim() || 'AI_Document') + '.pdf';
+
+  setProgress('txtProgWrap', 'txtProgFill', 'txtProgTxt', 0, 'Creating PDF...');
+  document.getElementById('txtDlBox').style.display = 'none';
+  await delay(100);
+
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: ps });
+    const pw = doc.internal.pageSize.getWidth();
+    const ph = doc.internal.pageSize.getHeight();
+    const margin = 20;
+    const maxW = pw - margin * 2;
+
+    doc.setFont(font === 'helvetica' ? 'helvetica' : font === 'times' ? 'times' : 'courier');
+    doc.setFontSize(size);
+
+    setProgress('txtProgWrap', 'txtProgFill', 'txtProgTxt', 40, 'Formatting text...');
+    await delay(100);
+
+    const lineH = size * 0.352778 * spacing;
+    let y = margin + 5;
+    const paragraphs = content.split('\n');
+
+    for (let pi = 0; pi < paragraphs.length; pi++) {
+      const para = paragraphs[pi];
+      if (!para.trim()) { y += lineH * 0.5; continue; }
+
+      const isHeader = para.startsWith('#') || (para.length < 60 && para === para.toUpperCase() && para.trim().length > 3);
+      if (isHeader) {
+        const headerText = para.replace(/^#+\s*/, '');
+        doc.setFont(font === 'helvetica' ? 'helvetica' : font === 'times' ? 'times' : 'courier', 'bold');
+        doc.setFontSize(size + 3);
+        const lines = doc.splitTextToSize(headerText, maxW);
+        if (y + lines.length * lineH > ph - margin) { doc.addPage(); y = margin + 5; }
+        doc.text(lines, margin, y, { align: align === 'justify' ? 'left' : align });
+        y += lines.length * lineH + 2;
+        doc.setFont(font === 'helvetica' ? 'helvetica' : font === 'times' ? 'times' : 'courier', 'normal');
+        doc.setFontSize(size);
+      } else {
+        const lines = doc.splitTextToSize(para, maxW);
+        for (let li = 0; li < lines.length; li++) {
+          if (y > ph - margin) { doc.addPage(); y = margin + 5; }
+          if (align === 'justify' && li < lines.length - 1) {
+            doc.text(lines[li], margin, y, { align: 'justify', maxWidth: maxW });
+          } else {
+            const xPos = align === 'center' ? pw / 2 : align === 'right' ? pw - margin : margin;
+            doc.text(lines[li], xPos, y, { align: align === 'justify' ? 'left' : align });
+          }
+          y += lineH;
+        }
+        y += lineH * 0.2;
+      }
+      setProgress('txtProgWrap', 'txtProgFill', 'txtProgTxt', 40 + Math.round((pi / paragraphs.length) * 50), `Processing page ${doc.internal.pages.length}...`);
+    }
+
+    setProgress('txtProgWrap', 'txtProgFill', 'txtProgTxt', 100, 'Done!');
+    await delay(300);
+
+    const blob = doc.output('blob');
+    const url = URL.createObjectURL(blob);
+    const dlBtn = document.getElementById('txtDlBtn');
+    dlBtn.href = url; dlBtn.download = fn;
+    document.getElementById('txtDlSub').textContent = `${doc.internal.pages.length - 1} pages · ${(blob.size / 1024).toFixed(0)} KB · ${fn}`;
+    document.getElementById('txtProgWrap').style.display = 'none';
+    document.getElementById('txtDlBox').style.display = 'block';
+    showToast('Text PDF created!', 'success');
+  } catch (e) {
+    document.getElementById('txtProgWrap').style.display = 'none';
+    showToast('Error: ' + e.message, 'error');
+  }
+}
+
+// ══════════════════════════════════════
+// AI THEME ENGINE
+// ══════════════════════════════════════
+async function applyAITheme() {
+  const prompt = document.getElementById('colorPrompt').value.trim();
+  if (!prompt) { showToast('Describe a theme first!', 'error'); return; }
+
+  const btn = document.getElementById('colorAiBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin"></div> Thinking...';
+
+  const respBox = document.getElementById('themeResponse');
+  const respText = document.getElementById('themeResponseText');
+  respBox.style.display = 'block';
+  respText.textContent = '';
+  respText.classList.add('typing');
+
+  try {
+    const res = await fetch(ANTHROPIC_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{
+          role: 'user',
+          content: `You are a UI color theme designer. Based on this description: "${prompt}", suggest a color theme for a dark-mode website.
+
+Respond ONLY with valid JSON in this exact format (no markdown, no explanation):
+{
+  "accent": "#hexcode",
+  "bg": "#hexcode",
+  "bg2": "#hexcode",
+  "name": "Theme Name",
+  "description": "One sentence description"
+}
+
+Rules:
+- accent: vibrant, eye-catching color that matches the vibe
+- bg: very dark background (near black)
+- bg2: slightly lighter dark for cards
+- Make it beautiful and cohesive`
+        }]
+      })
+    });
+
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+
+    const raw = data.content?.map(c => c.text || '').join('') || '';
+    respText.classList.remove('typing');
+
+    const clean = raw.replace(/```json|```/g, '').trim();
+    const theme = JSON.parse(clean);
+
+    respText.textContent = `Theme: "${theme.name}"\n${theme.description}\n\nAccent: ${theme.accent} | Background: ${theme.bg}`;
+    applyColorVars(theme.accent, theme.bg, theme.bg2);
+    showToast(`"${theme.name}" theme applied! 🎨`, 'success');
+  } catch (e) {
+    respText.classList.remove('typing');
+    respText.textContent = 'Could not connect to AI. Try a quick theme below!';
+    showToast('API not connected', 'error');
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '🎨 Apply Theme';
+}
+
+function applyTheme(el, accent, bg, bg2) {
+  document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  applyColorVars(accent, bg, bg2);
+  showToast(`Theme: ${el.dataset.name} ✨`, 'info');
+}
+
+function applyColorVars(accent, bg, bg2) {
+  const root = document.documentElement;
+  root.style.setProperty('--accent', accent);
+  root.style.setProperty('--bg', bg);
+  root.style.setProperty('--bg2', bg2 || bg);
+  root.style.setProperty('--card', shiftColor(bg, 10));
+  root.style.setProperty('--card2', shiftColor(bg, 18));
+  document.querySelector('.bg-mesh').style.background = `
+    radial-gradient(ellipse 80% 60% at 10% 10%, ${hexToRgba(accent, 0.07)} 0%, transparent 60%),
+    radial-gradient(ellipse 60% 70% at 90% 90%, ${hexToRgba(accent, 0.04)} 0%, transparent 60%)`;
+}
+
+function setCustomColor(hex, el) {
+  document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+  if (el) el.classList.add('active');
+  document.documentElement.style.setProperty('--accent', hex);
+  showToast('Color updated!', 'info');
+}
+
+function shiftColor(hex, amount) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgb(${Math.min(r + amount, 255)}, ${Math.min(g + amount, 255)}, ${Math.min(b + amount, 255)})`;
+}
+
+function hexToRgba(hex, alpha) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+// ══════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════
+function loadImg(src) {
+  return new Promise((res, rej) => {
+    const i = new Image();
+    i.onload = () => res(i);
+    i.onerror = rej;
+    i.src = src;
+  });
+}
+
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function setBusy(id, busy, label) {
+  const el = document.getElementById(id);
+  el.disabled = busy;
+  el.innerHTML = label;
+}
+
+function setProgress(wrapId, fillId, txtId, pct, msg) {
+  document.getElementById(wrapId).style.display = 'block';
+  document.getElementById(fillId).style.width = pct + '%';
+  document.getElementById(txtId).textContent = msg;
+}
+
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + type + ' show';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
